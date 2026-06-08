@@ -39,3 +39,11 @@ testem.log
 Thumbs.db
 
 .nx/cache
+
+# Next.js
+.next
+out
+
+# Environment
+.env
+.env.local
