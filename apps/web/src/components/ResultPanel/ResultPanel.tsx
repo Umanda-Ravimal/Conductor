@@ -26,7 +26,7 @@ export function ResultPanel({ result }: ResultPanelProps) {
       <CardHeader>
         <CardTitle className="text-lg">Result</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[420px] overflow-y-auto">
         {extractedItems ? (
           <pre className="overflow-x-auto rounded-md bg-highlight p-4 text-xs">
             {JSON.stringify(extractedItems, null, 2)}

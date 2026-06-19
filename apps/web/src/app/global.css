@@ -32,4 +32,33 @@
   body {
     @apply min-h-screen bg-background text-foreground antialiased;
   }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) hsl(var(--highlight));
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: hsl(var(--highlight));
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+    border: 2px solid hsl(var(--highlight));
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.45);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: hsl(var(--highlight));
+  }
 }

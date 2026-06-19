@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { cn } from '../../lib/utils';
 import type { TaskFrame } from '../../hooks/useTaskStore';
 
 interface BrowserStreamViewerProps {
@@ -11,17 +10,24 @@ interface BrowserStreamViewerProps {
 export function BrowserStreamViewer({ frames }: BrowserStreamViewerProps) {
   const latest = useMemo(() => frames[frames.length - 1] ?? null, [frames]);
   const [displaySrc, setDisplaySrc] = useState<string | null>(null);
-  const [fading, setFading] = useState(false);
 
   useEffect(() => {
     if (!latest) return;
-    setFading(true);
-    const timer = setTimeout(() => {
-      setDisplaySrc(`data:image/jpeg;base64,${latest.screenshotB64}`);
-      setFading(false);
-    }, 80);
-    return () => clearTimeout(timer);
-  }, [latest]);
+
+    const src = `data:image/jpeg;base64,${latest.screenshotB64}`;
+    const img = new Image();
+    let cancelled = false;
+
+    img.onload = () => {
+      if (!cancelled) setDisplaySrc(src);
+    };
+    img.src = src;
+
+    return () => {
+      cancelled = true;
+      img.onload = null;
+    };
+  }, [latest?.screenshotB64, latest?.timestamp]);
 
   if (!displaySrc) {
     return (
@@ -37,10 +43,7 @@ export function BrowserStreamViewer({ frames }: BrowserStreamViewerProps) {
       <img
         src={displaySrc}
         alt="Browser stream frame"
-        className={cn(
-          'h-auto w-full transition-opacity duration-200',
-          fading ? 'opacity-40' : 'opacity-100'
-        )}
+        className="h-auto w-full"
       />
     </div>
   );

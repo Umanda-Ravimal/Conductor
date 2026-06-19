@@ -33,11 +33,16 @@ export function mapTaskTypeToApi(value: TaskTypeOption): string {
 interface TaskTypeSelectorProps {
   value: TaskTypeOption;
   onChange: (value: TaskTypeOption) => void;
+  disabled?: boolean;
 }
 
-export function TaskTypeSelector({ value, onChange }: TaskTypeSelectorProps) {
+export function TaskTypeSelector({ value, onChange, disabled }: TaskTypeSelectorProps) {
   return (
-    <Select value={value} onValueChange={(v) => onChange(v as TaskTypeOption)}>
+    <Select
+      value={value}
+      onValueChange={(v) => onChange(v as TaskTypeOption)}
+      disabled={disabled}
+    >
       <SelectTrigger>
         <SelectValue placeholder="Select task type" />
       </SelectTrigger>
