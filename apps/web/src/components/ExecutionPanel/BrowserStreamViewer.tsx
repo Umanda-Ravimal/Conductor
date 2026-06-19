@@ -25,14 +25,14 @@ export function BrowserStreamViewer({ frames }: BrowserStreamViewerProps) {
 
   if (!displaySrc) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
+      <div className="flex h-64 items-center justify-center rounded-lg bg-highlight text-sm text-muted-foreground">
         Waiting for live frames…
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-black/40">
+    <div className="overflow-hidden rounded-lg bg-highlight">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={displaySrc}

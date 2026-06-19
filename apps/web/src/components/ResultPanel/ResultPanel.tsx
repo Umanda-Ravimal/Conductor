@@ -28,13 +28,13 @@ export function ResultPanel({ result }: ResultPanelProps) {
       </CardHeader>
       <CardContent>
         {extractedItems ? (
-          <pre className="overflow-x-auto rounded-md bg-muted/40 p-4 text-xs">
+          <pre className="overflow-x-auto rounded-md bg-highlight p-4 text-xs">
             {JSON.stringify(extractedItems, null, 2)}
           </pre>
         ) : isRecord(result) ? (
           <ResultTable data={result} />
         ) : (
-          <pre className="overflow-x-auto rounded-md bg-muted/40 p-4 text-xs">
+          <pre className="overflow-x-auto rounded-md bg-highlight p-4 text-xs">
             {JSON.stringify(result, null, 2)}
           </pre>
         )}

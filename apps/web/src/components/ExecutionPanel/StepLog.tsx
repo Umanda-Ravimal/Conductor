@@ -28,8 +28,10 @@ export function StepLog({ log }: StepLogProps) {
           : 'text-muted-foreground';
 
   return (
-    <div className="flex gap-3 py-2 border-b border-border/50 last:border-0">
-      <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', color)} />
+    <div className="flex gap-3 rounded-md bg-highlight px-3 py-2">
+      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border">
+        <Icon className={cn('h-4 w-4', color)} />
+      </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm">
           <span className="text-muted-foreground">Step {log.stepNumber}: </span>

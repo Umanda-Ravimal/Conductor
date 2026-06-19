@@ -18,17 +18,17 @@ export function ResultTable({ data }: ResultTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-border">
+    <div className="overflow-x-auto rounded-md bg-highlight">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border bg-muted/40">
+          <tr className="bg-accent/40">
             <th className="px-4 py-2 text-left font-medium">Key</th>
             <th className="px-4 py-2 text-left font-medium">Value</th>
           </tr>
         </thead>
         <tbody>
           {entries.map(([key, value]) => (
-            <tr key={key} className="border-b border-border/50 last:border-0">
+            <tr key={key} className="even:bg-accent/20">
               <td className="px-4 py-2 align-top font-mono text-muted-foreground">
                 {key}
               </td>

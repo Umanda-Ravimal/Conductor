@@ -38,7 +38,11 @@ export function ExecutionPanel({
           {logs.length === 0 ? (
             <p className="text-sm text-muted-foreground">Waiting for agent steps…</p>
           ) : (
-            logs.map((log) => <StepLog key={log.id} log={log} />)
+            <div className="space-y-2">
+              {logs.map((log) => (
+                <StepLog key={log.id} log={log} />
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

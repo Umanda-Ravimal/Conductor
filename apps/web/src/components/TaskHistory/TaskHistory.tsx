@@ -50,7 +50,7 @@ export function TaskHistory() {
             <li key={task.id}>
               <Link
                 href={`/tasks/${task.id}`}
-                className="block rounded-lg border border-border p-4 transition-colors hover:bg-accent/40"
+                className="block rounded-lg bg-highlight p-4 transition-colors hover:bg-accent"
               >
                 <div className="flex items-start justify-between gap-4">
                   <p className="line-clamp-2 text-sm font-medium">{task.goal}</p>
