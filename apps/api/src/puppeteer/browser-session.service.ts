@@ -257,6 +257,36 @@ export class BrowserSessionService implements OnModuleDestroy {
           .filter((t) => t.length > 2);
         if (normalized.length === 0) return false;
 
+        const maxTextLen = Math.max(
+          600,
+          normalized.reduce((sum, t) => sum + t.length, 0) * 5
+        );
+
+        const isTooLarge = (el: HTMLElement) => {
+          const textLen = el.textContent?.trim().length ?? 0;
+          if (textLen > maxTextLen) return true;
+          const rect = el.getBoundingClientRect();
+          return (
+            rect.width > window.innerWidth * 0.92 &&
+            rect.height > window.innerHeight * 0.45
+          );
+        };
+
+        const countMatches = (text: string) => {
+          let score = 0;
+          let count = 0;
+          for (const term of normalized) {
+            if (text.includes(term)) {
+              count++;
+              score += term.length;
+            }
+          }
+          return { count, score };
+        };
+
+        const hasAllTerms = (text: string) =>
+          normalized.every((term) => text.includes(term));
+
         const candidates: HTMLElement[] = containerSel
           ? Array.from(document.querySelectorAll<HTMLElement>(containerSel))
           : Array.from(document.querySelectorAll<HTMLElement>('body *')).filter(
@@ -266,34 +296,117 @@ export class BrowserSessionService implements OnModuleDestroy {
               }
             );
 
+        const scoreCandidate = (el: HTMLElement) => {
+          if (el.hasAttribute('data-conductor-highlight')) return -1;
+          if (el.closest('[data-conductor-highlight]')) return -1;
+          if (isTooLarge(el)) return -1;
+
+          const text = el.textContent?.trim().toLowerCase() ?? '';
+          if (!text) return -1;
+
+          const { count, score } = countMatches(text);
+          if (count === 0) return -1;
+
+          // Require every term when picking among known item containers.
+          if (containerSel && !hasAllTerms(text)) return -1;
+
+          return (
+            count * 1000 +
+            score +
+            Math.max(0, maxTextLen - text.length) * 0.02
+          );
+        };
+
         let best: HTMLElement | null = null;
         let bestScore = 0;
 
         for (const el of candidates) {
-          if (el.hasAttribute('data-conductor-highlight')) continue;
-          if (el.closest('[data-conductor-highlight]')) continue;
-
-          const text = el.textContent?.trim().toLowerCase() ?? '';
-          if (!text) continue;
-
-          let score = 0;
-          for (const term of normalized) {
-            if (text.includes(term)) {
-              score += term.length;
-            }
-          }
-          if (score === 0) continue;
-
-          // Prefer tighter containers so we highlight the card, not the whole page.
-          score += Math.max(0, 400 - text.length) * 0.05;
-
-          if (score > bestScore) {
-            bestScore = score;
+          const combinedScore = scoreCandidate(el);
+          if (combinedScore > bestScore) {
+            bestScore = combinedScore;
             best = el;
           }
         }
 
-        if (!best) return false;
+        if (!best && containerSel) {
+          // Fallback: pick the tightest container with the most matching terms.
+          for (const el of candidates) {
+            if (el.hasAttribute('data-conductor-highlight')) continue;
+            if (el.closest('[data-conductor-highlight]')) continue;
+            if (isTooLarge(el)) continue;
+
+            const text = el.textContent?.trim().toLowerCase() ?? '';
+            const { count, score } = countMatches(text);
+            if (count === 0) continue;
+
+            const combinedScore =
+              count * 1000 +
+              score +
+              Math.max(0, maxTextLen - text.length) * 0.02;
+            if (combinedScore > bestScore) {
+              bestScore = combinedScore;
+              best = el;
+            }
+          }
+        }
+
+        if (!best) {
+          // Last resort: start from the tightest partial text match, then walk
+          // up only until all terms fit within the size budget.
+          let bestMatch: HTMLElement | null = null;
+          let bestMatchScore = 0;
+
+          for (const el of candidates) {
+            if (el.hasAttribute('data-conductor-highlight')) continue;
+            if (el.closest('[data-conductor-highlight]')) continue;
+
+            const text = el.textContent?.trim().toLowerCase() ?? '';
+            if (!text) continue;
+
+            const { count, score } = countMatches(text);
+            if (count === 0) continue;
+
+            const combinedScore =
+              count * 1000 +
+              score +
+              Math.max(0, maxTextLen - text.length) * 0.02;
+            if (combinedScore > bestMatchScore) {
+              bestMatchScore = combinedScore;
+              bestMatch = el;
+            }
+          }
+
+          if (!bestMatch) return false;
+
+          let fallback = bestMatch;
+          let fallbackCount = countMatches(
+            bestMatch.textContent?.trim().toLowerCase() ?? ''
+          ).count;
+
+          let current: HTMLElement | null = bestMatch;
+          while (current && current !== document.body) {
+            if (isTooLarge(current)) break;
+
+            const text = current.textContent?.trim().toLowerCase() ?? '';
+            const { count } = countMatches(text);
+
+            if (hasAllTerms(text)) {
+              best = current;
+              break;
+            }
+
+            if (count > fallbackCount) {
+              fallbackCount = count;
+              fallback = current;
+            }
+
+            current = current.parentElement;
+          }
+
+          if (!best) best = fallback;
+        }
+
+        if (!best || isTooLarge(best)) return false;
 
         if (!document.getElementById('conductor-highlight-styles')) {
           const style = document.createElement('style');

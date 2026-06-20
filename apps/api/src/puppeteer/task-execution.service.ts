@@ -221,6 +221,12 @@ export class TaskExecutionService {
       }
     }
 
+    if (!containerSelector) {
+      containerSelector =
+        (await this.browserSession.discoverRepeatingSelector(tabId)) ??
+        undefined;
+    }
+
     for (let i = 0; i < items.length; i++) {
       await this.browserSession.removeHighlights(taskId).catch(() => undefined);
 
@@ -272,8 +278,13 @@ export class TaskExecutionService {
       'name',
       'heading',
       'label',
+      'jobTitle',
+      'role',
+      'position',
       'company',
       'location',
+      'date',
+      'postedDate',
       'text',
     ]) {
       const value = obj[key];
